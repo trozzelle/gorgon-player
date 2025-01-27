@@ -103,6 +103,7 @@ export class AudioController {
     setBalance(value: number) {
         this.gainA.gain.value = 1 - value
         this.gainB.gain.value = value
+        console.log(`Gain A: ${this.gainA.gain.value}, Gain B: ${this.gainB.gain.value}`)
     }
 
 
