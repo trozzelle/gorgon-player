@@ -4,6 +4,8 @@ declare global {
     }
 }
 
+// Determines either standard AudioContext or webkit prefix for Safari
+const AudioContextClass = window.AudioContext || window.webkitAudioContext
 
 export class AudioController {
     /**
@@ -30,8 +32,11 @@ export class AudioController {
     private offset = 0
 
     constructor() {
-        this.audioContext = new AudioContext()
-
+        try {
+            this.audioContext = new AudioContextClass()
+        } catch (e) {
+            throw new Error("Web Audio API is not supported by this browser")
+        }
         this.gainA = this.audioContext.createGain()
         this.gainB = this.audioContext.createGain()
 
@@ -40,6 +45,9 @@ export class AudioController {
     }
 
     async loadTracks(trackAUrl: string, trackBUrl: string): Promise<void> {
+        /**
+         * Load A and B track audio buffers
+         */
         const [bufferA, bufferB] = await Promise.all([
             this.fetchAudioBuffer(trackAUrl),
             this.fetchAudioBuffer(trackBUrl)
@@ -59,6 +67,7 @@ export class AudioController {
     }
 
     play() {
+
         // If we're already playing or either buffer is empty, return
         if (this.isPlaying) return
         if (!this.audioBufferA || !this.audioBufferB) return
