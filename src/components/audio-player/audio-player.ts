@@ -33,7 +33,12 @@ export class GorgonPlayer extends HTMLElement {
         const trackA = this.getAttribute('track-a') || ''
         const trackB = this.getAttribute('track-b') || ''
 
-        await this.audioController.loadTracks(trackA, trackB)
+        try {
+            await this.audioController.loadTracks(trackA, trackB)
+        }
+        catch (error) {
+            console.log(`Error loading tracks: ${error}`)
+        }
     }
 
     disconnectedCallback() {
@@ -159,6 +164,9 @@ export class GorgonPlayer extends HTMLElement {
     //         slider.addEventListener('input', handleSlider)
     //     }
     // }
+    protected getAudioController(): AudioController {
+        return this.audioController
+    }
 }
 
 customElements.define('gorgon-player', GorgonPlayer)

@@ -7,6 +7,11 @@ declare global {
 // Determines either standard AudioContext or webkit prefix for Safari
 const AudioContextClass = window.AudioContext || window.webkitAudioContext
 
+export interface LoadedTracks {
+    trackA: AudioBuffer | null
+    trackB: AudioBuffer | null
+}
+
 export class AudioController {
     /**
      * Controller class for audio player
@@ -48,19 +53,31 @@ export class AudioController {
         /**
          * Load A and B track audio buffers
          */
+        console.log('Loading tracks: ', { trackAUrl, trackBUrl })
+
         const [bufferA, bufferB] = await Promise.all([
             this.fetchAudioBuffer(trackAUrl),
             this.fetchAudioBuffer(trackBUrl)
         ])
 
+        console.log('Buffers loaded: ', { bufferA, bufferB })
+
         this.audioBufferA = bufferA
         this.audioBufferB = bufferB
+    }
+
+    getLoadedTracks(): LoadedTracks {
+        return {
+            trackA: this.audioBufferA,
+            trackB: this.audioBufferB
+        }
     }
 
     private async fetchAudioBuffer(url: string): Promise<AudioBuffer> {
         /**
          * Fetches and decodes track
          */
+        console.log('Fetching: ', url)
         const response = await fetch(url)
         const arrayBuffer = await response.arrayBuffer()
         return await this.audioContext.decodeAudioData(arrayBuffer)

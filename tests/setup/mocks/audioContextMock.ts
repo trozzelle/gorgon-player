@@ -1,4 +1,6 @@
 export class AudioContextMock {
+    destination = {}
+
     createGain() {
         return {
             connect: jest.fn(),
@@ -17,8 +19,14 @@ export class AudioContextMock {
         }
     }
 
-    decodeAudioData() {
-        return Promise.resolve({} as AudioBuffer)
+    decodeAudioData(_: ArrayBuffer) {
+        console.log('Decoding audio data')
+        return Promise.resolve({
+            duration: 1,
+            length: 1000,
+            sampleRate: 44100,
+            numberOfChannels: 2
+        } as AudioBuffer)
     }
 }
 
