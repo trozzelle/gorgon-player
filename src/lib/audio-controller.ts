@@ -66,10 +66,17 @@ export class AudioController {
         this.audioBufferB = bufferB
     }
 
-    getLoadedTracks(): LoadedTracks {
+    protected getLoadedTracks(): LoadedTracks {
         return {
             trackA: this.audioBufferA,
             trackB: this.audioBufferB
+        }
+    }
+
+    protected getSourceNodes() {
+        return {
+            sourceA: this.sourceA,
+            sourceB: this.sourceB
         }
     }
 

@@ -1,6 +1,6 @@
 export class AudioContextMock {
     destination = {}
-
+    sourceNodes: any[] = []
     createGain() {
         return {
             connect: jest.fn(),
@@ -11,12 +11,14 @@ export class AudioContextMock {
     }
 
     createBufferSource() {
-        return {
+        const sourceNode = {
             connect: jest.fn(),
             start: jest.fn(),
             stop: jest.fn(),
             buffer: null
         }
+        this.sourceNodes.push(sourceNode)
+        return sourceNode
     }
 
     decodeAudioData(_: ArrayBuffer) {
