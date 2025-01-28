@@ -12,7 +12,8 @@ export class GorgonPlayer extends HTMLElement {
 
     constructor() {
         super()
-        this.shadow = this.attachShadow({mode: 'closed'})
+        // TODO: Create dev/prod value insertion here
+        this.shadow = this.attachShadow({mode: 'open'})
         this.audioController = new AudioController()
 
         this.handlePlay = this.handlePlay.bind(this)
@@ -68,15 +69,27 @@ export class GorgonPlayer extends HTMLElement {
     }
 
     private render() {
-        const stylesheet = new CSSStyleSheet()
-        stylesheet.replaceSync(styles)
-        this.shadow.adoptedStyleSheets = [stylesheet]
+        // const stylesheet = new CSSStyleSheet()
+        // stylesheet.replaceSync(styles)
+        // this.shadow.adoptedStyleSheets = [stylesheet]
+
+        if (this.shadow.adoptedStyleSheets !== undefined && 'replaceSync' in CSSStyleSheet.prototype) {
+            const stylesheet = new CSSStyleSheet()
+            stylesheet.replaceSync(styles)
+            this.shadow.adoptedStyleSheets = [stylesheet]
+        } else {
+            const styleElement = document.createElement('style')
+            styleElement.textContent = styles
+            this.shadow.appendChild(styleElement)
+        }
 
         this.shadow.innerHTML = `
               <div class="player-container">
                 <div class="controls">
                   <button class="play-button" id="play-button">
-                    ${this.isPlaying ? '⏸' : '▶'}
+                    <span id="play-icon">
+                        ${this.isPlaying ? '⏸' : '▶'}
+                    </span>
                   </button>
                   <input 
                     type="range" 
