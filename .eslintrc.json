@@ -4,7 +4,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:lit/recommended"
   ],
   "env": {
     "browser": true,
