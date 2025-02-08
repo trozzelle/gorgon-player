@@ -1,6 +1,7 @@
 import { AudioController } from '../../lib/audio-controller.ts'
 import styles from './audio-player.css?inline'
 import { html, render } from 'lit-html'
+import { logger } from '../../lib/logger.ts'
 
 export class GorgonPlayer extends HTMLElement {
   private shadow: ShadowRoot
@@ -21,7 +22,7 @@ export class GorgonPlayer extends HTMLElement {
     this.audioController = new AudioController()
 
     this.handlePlay = this.handlePlay.bind(this)
-    this.handleSlider = this.handleSlider.bind(this)
+    this.handleToggle = this.handleToggle.bind(this)
 
     this.setupStyles()
     this.render()
@@ -56,17 +57,16 @@ export class GorgonPlayer extends HTMLElement {
     try {
       await this.audioController.loadTracks(trackA, trackB)
     } catch (error) {
-      console.log(`Error loading tracks: ${error}`)
+      logger.debug(`Error loading tracks: ${error}`)
     }
   }
 
   disconnectedCallback() {
     this.playButton?.removeEventListener('click', this.handlePlay)
-    this.slider?.removeEventListener('input', this.handleSlider)
+    this.slider?.removeEventListener('input', this.handleToggle)
   }
 
   private handlePlay() {
-    console.log('Pressed')
     if (this.isPlaying) {
       this.audioController.pause()
     } else {
@@ -77,7 +77,7 @@ export class GorgonPlayer extends HTMLElement {
   }
 
   // Refactoring to toggle
-  private handleSlider(e: Event) {
+  private handleToggle(e: Event) {
     const checked = (e.target as HTMLInputElement).checked
     const value = checked ? 1 : 0
     this.audioController.setBalance(value)
@@ -90,8 +90,8 @@ export class GorgonPlayer extends HTMLElement {
   }
 
   private setupEventListeners() {
-    this.playButton?.addEventListener('click', this.handlePlay)
-    this.slider?.addEventListener('input', this.handleSlider)
+    // this.playButton?.addEventListener('click', this.handlePlay)
+    // this.slider?.addEventListener('input', this.handleToggle)
   }
 
   private template() {
@@ -105,7 +105,7 @@ export class GorgonPlayer extends HTMLElement {
         <div class="main-player">
           <div class="player-header">
             <h2 class="track-title">${this.trackATitle || 'Demo Track'}</h2>
-            <p class="track-subtitle">${this.trackBTitle || 'Master'}</p>
+            <p class="track-subtitle">${this.trackBTitle || 'Artist'}</p>
           </div>
 
           <div class="controls">
@@ -116,7 +116,7 @@ export class GorgonPlayer extends HTMLElement {
           <div class="compare-controls">
             <span class="track-label">Demo</span>
             <label class="toggle-switch">
-              <input type="checkbox" class="compare-toggle" @change=${this.handleSlider} />
+              <input type="checkbox" class="compare-toggle" @change=${this.handleToggle} />
               <span class="slider"></span>
             </label>
             <span class="track-label">Master</span>

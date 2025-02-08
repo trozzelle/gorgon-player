@@ -20,7 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* Types */
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["vitest/client"]
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

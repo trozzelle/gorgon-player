@@ -54,6 +54,12 @@
     font-family: system-ui, -apple-system, sans-serif;
 }
 
+.gorgon-player {
+    border-radius: 16px;
+    border-color: #666666;
+    border-width: 2px;
+}
+
 .player-container {
     background: white;
     border-radius: 16px;
@@ -118,7 +124,7 @@
 .progress-bar {
     flex-grow: 1;
     height: 4px;
-    background: #eee;
+    background: #cccccc;
     border-radius: 2px;
 }
 

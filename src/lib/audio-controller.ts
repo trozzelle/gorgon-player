@@ -1,3 +1,5 @@
+import { logger } from './logger.ts'
+
 declare global {
   interface Window {
     webkitAudioContext: typeof AudioContext
@@ -53,14 +55,14 @@ export class AudioController {
     /**
      * Load A and B track audio buffers
      */
-    console.log('Loading tracks: ', { trackAUrl, trackBUrl })
+    logger.info('Loading tracks: ', { trackAUrl, trackBUrl })
 
     const [bufferA, bufferB] = await Promise.all([
       this.fetchAudioBuffer(trackAUrl),
       this.fetchAudioBuffer(trackBUrl),
     ])
 
-    console.log('Buffers loaded: ', { bufferA, bufferB })
+    logger.debug('Buffers loaded: ', { bufferA, bufferB })
 
     this.audioBufferA = bufferA
     this.audioBufferB = bufferB
@@ -84,7 +86,7 @@ export class AudioController {
     /**
      * Fetches and decodes track
      */
-    console.log('Fetching: ', url)
+    logger.debug('Fetching: ', url)
     const response = await fetch(url)
     const arrayBuffer = await response.arrayBuffer()
     return await this.audioContext.decodeAudioData(arrayBuffer)
@@ -92,6 +94,8 @@ export class AudioController {
 
   play() {
     // If we're already playing or either buffer is empty, return
+    logger.info('Play method called')
+
     if (this.isPlaying) return
     if (!this.audioBufferA || !this.audioBufferB) return
 
@@ -112,6 +116,7 @@ export class AudioController {
   }
 
   pause() {
+    logger.info('Pause method called')
     if (!this.isPlaying) return
 
     this.sourceA?.stop()
@@ -124,6 +129,6 @@ export class AudioController {
   setBalance(value: number) {
     this.gainA.gain.value = 1 - value
     this.gainB.gain.value = value
-    console.log(`Gain A: ${this.gainA.gain.value}, Gain B: ${this.gainB.gain.value}`)
+    logger.debug(`Gain A: ${this.gainA.gain.value}, Gain B: ${this.gainB.gain.value}`)
   }
 }

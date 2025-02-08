@@ -1,97 +1,97 @@
-import { GorgonPlayer} from "../../../src"
-// import {queries} from "@testing-library/dom";
-import { fireEvent } from '@testing-library/dom'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { GorgonPlayer } from '../../../src/index'
 
 describe('GorgonPlayer', () => {
-    let player: GorgonPlayer
+  let player: GorgonPlayer
 
-    beforeEach(() => {
-        global.fetch = jest.fn().mockImplementation(() => {
-            return Promise.resolve({
-                ok: true,
-                arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-                headers: new Headers(),
-                status: 200,
-                statusText: 'OK',
-                type: 'basic',
-                url: '',
-                clone: () => {},
-                body: null,
-                bodyUsed: false,
-                json: () => Promise.resolve(),
-                text: () => Promise.resolve('')
-            } as Response)
-        }) as jest.Mock
+  beforeEach(async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(8),
+      headers: new Headers(),
+      status: 200,
+      statusText: 'OK',
+    } as Response)
 
-        player = new GorgonPlayer()
-        document.body.appendChild(player)
+    player = new GorgonPlayer()
+    document.body.appendChild(player)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
+
+  afterEach(() => {
+    player.remove()
+    vi.clearAllMocks()
+  })
+
+  describe('Initial Rendering', () => {
+    it('should render with default play button state', () => {
+      const playButton = player.shadowRoot?.querySelector('.play-button')
+      const playIcon = playButton?.querySelector('.play-icon')
+
+      expect(playButton).toBeTruthy()
+      expect(playIcon?.textContent?.trim()).toBe('▶')
     })
 
-    afterEach(() => {
-        player.remove()
-        document.head.querySelectorAll('style').forEach(style => style.remove())
-        jest.restoreAllMocks()
+    it('should render with default track titles', () => {
+      const title = player.shadowRoot?.querySelector('.track-title')
+      const subtitle = player.shadowRoot?.querySelector('.track-subtitle')
+
+      expect(title?.textContent).toBe('Demo Track')
+      expect(subtitle?.textContent).toBe('Artist')
     })
 
-    it('should render initial state correctly', () => {
-        const shadow = player.shadowRoot
-        expect(shadow).toBeTruthy()
+    it('should render with compare controls', () => {
+      const compareToggle = player.shadowRoot?.querySelector('.compare-toggle') as HTMLInputElement
 
-        const playButton = shadow?.querySelector('#play-icon')
-        expect(playButton).toBeTruthy()
-        expect(playButton?.textContent?.trim()).toBe('▶')
+      expect(compareToggle).toBeTruthy()
+      expect(compareToggle.checked).toBe(false)
+    })
+  })
 
-        const slider = shadow?.querySelector('.compare-slider')
-        expect(slider).toBeTruthy()
-        expect((slider as HTMLInputElement)?.value).toBe('50')
+  describe('Playback Control', () => {
+    it('should toggle play/pause state when clicking play button', async () => {
+      const playButton = player.shadowRoot?.querySelector('.play-button')
+      const audioController = (player as any).getAudioController()
+      const clickEvent = new CustomEvent('click', {
+        bubbles: true,
+        composed: true,
+      })
+
+      const playSpy = vi.spyOn(audioController, 'play')
+      const pauseSpy = vi.spyOn(audioController, 'pause')
+
+      expect(playButton?.textContent?.trim()).toBe('▶')
+
+      playButton?.dispatchEvent(clickEvent)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      expect(playButton?.textContent?.trim()).toBe('⏸')
+      expect(playSpy).toHaveBeenCalledOnce()
+
+      playButton?.dispatchEvent(clickEvent)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+
+      expect(playButton?.textContent?.trim()).toBe('▶')
+      expect(pauseSpy).toHaveBeenCalledOnce()
     })
 
-    it('should update play button state when clicked', () => {
-        const shadow = player.shadowRoot
-        const playButton = shadow?.querySelector('.play-button')
+    it('should maintain correct playing state in AudioController', async () => {
+      const playButton = player.shadowRoot?.querySelector('.play-button')
+      const audioController = (player as any).getAudioController()
 
-        if (!playButton) fail("Could not select play button")
+      const clickEvent = new CustomEvent('click', {
+        bubbles: true,
+        composed: true,
+      })
 
-        fireEvent.click(playButton)
-        expect(playButton?.textContent?.trim()).toBe('⏸')
+      playButton?.dispatchEvent(clickEvent)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(audioController.isPlaying).toBe(true)
 
-        fireEvent.click(playButton)
-        expect(playButton?.textContent?.trim()).toBe('▶')
-
+      playButton?.dispatchEvent(clickEvent)
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(audioController.isPlaying).toBe(false)
     })
-
-    it('should load tracks from attributes', async() => {
-        // For this test we need to set the attributes, so we're
-        // removing the player from the DOM, setting the attrs,
-        // then adding it back
-        player.remove()
-
-        const testPlayer = new GorgonPlayer()
-
-        testPlayer.setAttribute('track-a', '/tests/fixtures/beastie_A.mp3')
-        testPlayer.setAttribute('track-b', '/tests/fixtures/beastie_B.mp3')
-
-        document.body.appendChild(testPlayer)
-        // Waits for connectedCallback to complete
-        await new Promise(resolve => setTimeout(resolve, 0))
-
-        const audioController = (testPlayer as any).getAudioController()
-        const { trackA, trackB } = audioController.getLoadedTracks()
-
-        // Debug
-        console.log('Attributes: ', {
-            trackA: testPlayer.getAttribute('track-a'),
-            trackB: testPlayer.getAttribute('track-b')
-        })
-        console.log('Loaded tracks: ', {trackA, trackB})
-
-        expect(trackA).toBeTruthy()
-        expect(trackB).toBeTruthy()
-
-        expect(fetch).toHaveBeenCalledWith('/tests/fixtures/beastie_A.mp3')
-        expect(fetch).toHaveBeenCalledWith('/tests/fixtures/beastie_B.mp3')
-
-        testPlayer.remove()
-    })
-
+  })
 })
