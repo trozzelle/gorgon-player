@@ -27,10 +27,11 @@
     /* Types */
     "typeRoots": [
       "./node_modules/@types",
-      "./src/types"
+      "./src/types",
+      "./node_modules"
     ],
     "types": [
-      "vitest/client"
+      "vite/client"
     ]
   },
   "include": [

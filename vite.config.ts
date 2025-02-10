@@ -6,9 +6,19 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       name: 'GorgonPlayer',
-      fileName: 'gorgon-player',
-      formats: ['es'],
+      fileName: (format) => `gorgon-player.${format}.js`,
+      formats: ['es', 'umd'],
     },
+    rollupOptions: {
+      // external: ['lit'],
+      output: {
+        globals: {
+          lit: 'Lit',
+        },
+      },
+    },
+    sourcemap: true,
+    minify: 'esbuild',
   },
   server: {
     watch: {
