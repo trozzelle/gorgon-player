@@ -39,8 +39,8 @@ export class AudioController {
   private offset = 0
 
   private duration: number = 0
-  private progressCallback: ((time: number) => void) | null = null
-  private rafId: number | null = null
+  // private progressCallback: ((time: number) => void) | null = null
+  // private rafId: number | null = null
 
   private eventTarget = new EventTarget()
 

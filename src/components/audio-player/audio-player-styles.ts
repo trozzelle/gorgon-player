@@ -42,13 +42,13 @@ export const audioPlayerStyles = css`
     margin-bottom: 24px;
   }
 
-  .track-title {
+  .track-name {
     font-size: 24px;
     font-weight: 600;
     margin: 0 0 4px 0;
   }
 
-  .track-subtitle {
+  .artist-name {
     font-size: 16px;
     color: #666;
     margin: 0;
@@ -77,20 +77,6 @@ export const audioPlayerStyles = css`
   .play-button:hover {
     background: #333;
   }
-
-  //.progress-bar {
-  //  flex-grow: 1;
-  //  height: 4px;
-  //  background: #cccccc;
-  //  border-radius: 2px;
-  //}
-  //
-  //.time {
-  //  font-size: 14px;
-  //  color: #666;
-  //  min-width: 45px;
-  //  text-align: right;
-  //}
 
   .progress-bar {
     position: relative;

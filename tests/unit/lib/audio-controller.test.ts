@@ -30,7 +30,7 @@ describe('AudioController', () => {
     vi.clearAllMocks()
   })
 
-  describe('loadTracks', () => {
+  describe('Load Tracks', () => {
     it('should load both tracks successfully', async () => {
       await audioController.loadTracks(
         '/tests/fixtures/beastie_A.mp3',

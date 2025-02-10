@@ -35,11 +35,11 @@ describe('GorgonPlayer', () => {
     })
 
     it('should render with default track titles', () => {
-      const title = player.shadowRoot?.querySelector('.track-title')
-      const subtitle = player.shadowRoot?.querySelector('.track-subtitle')
+      const title = player.shadowRoot?.querySelector('.track-name')
+      const subtitle = player.shadowRoot?.querySelector('.artist-name')
 
-      expect(title?.textContent).toBe('Demo Track')
-      expect(subtitle?.textContent).toBe('Artist')
+      expect(title?.textContent).toBe('Default Track')
+      expect(subtitle?.textContent).toBe('No Artist')
     })
 
     it('should render with compare controls', () => {
@@ -148,7 +148,7 @@ describe('GorgonPlayer', () => {
       expect(seekSpy).toHaveBeenCalledWith(90) // 1/2 of mock audio duration
     })
 
-    it('should format time display correctly', () => {
+    it('should format time display correctly', async () => {
       const audioController = (player as any).getAudioController()
 
       const times = [
@@ -157,7 +157,7 @@ describe('GorgonPlayer', () => {
         { seconds: 179, expected: '02:59' },
       ]
 
-      times.forEach(async ({ seconds, expected }) => {
+      for (const { seconds, expected } of times) {
         const timeUpdatedEvent = new CustomEvent('timeupdate', {
           detail: seconds,
         })
@@ -167,7 +167,7 @@ describe('GorgonPlayer', () => {
 
         const timeDisplay = player.shadowRoot?.querySelector('.time')
         expect(timeDisplay?.textContent?.trim()).toContain(expected)
-      })
+      }
     })
 
     it('should cleanup timeupdate listener on disconnect', () => {
