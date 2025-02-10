@@ -78,10 +78,10 @@ export class GorgonPlayer extends LitElement {
     this.audioController.seek(newTime)
   }
 
-  private updateProgress(time: number) {
-    this.currentTime = time
-    this.duration = this.audioController.getDuration()
-  }
+  // private updateProgress(time: number) {
+  //   this.currentTime = time
+  //   this.duration = this.audioController.getDuration()
+  // }
 
   private formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60)

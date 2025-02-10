@@ -142,6 +142,7 @@ describe('GorgonPlayer', () => {
         composed: true,
       })
 
+      //@ts-expect-error MouseEvent satisfies Event
       progressBar?.dispatchEvent(clickEvent)
       await player.updateComplete
 
