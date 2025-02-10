@@ -38,6 +38,12 @@ export class AudioController {
   private startTime = 0
   private offset = 0
 
+  private duration: number = 0
+  // private progressCallback: ((time: number) => void) | null = null
+  // private rafId: number | null = null
+
+  private eventTarget = new EventTarget()
+
   constructor() {
     try {
       this.audioContext = new AudioContextClass()
@@ -66,6 +72,10 @@ export class AudioController {
 
     this.audioBufferA = bufferA
     this.audioBufferB = bufferB
+
+    this.duration = bufferA.duration
+
+    this.eventTarget.dispatchEvent(new CustomEvent('timeupdate', { detail: 0 }))
   }
 
   protected getLoadedTracks(): LoadedTracks {
@@ -113,6 +123,7 @@ export class AudioController {
     this.sourceB.start(0, this.offset)
 
     this.isPlaying = true
+    this.startProgressTracking()
   }
 
   pause() {
@@ -124,6 +135,79 @@ export class AudioController {
 
     this.offset = this.audioContext.currentTime - this.startTime
     this.isPlaying = false
+    // this.stopProgressTracking()
+  }
+
+  // setProgressCallback(callback: (time: number) => void) {
+  //   this.progressCallback = callback
+  // }
+  //
+  // private startProgressTracking() {
+  //   const updateProgress = () => {
+  //     // if (!this.isPlaying) return
+  //
+  //     const currentTime = this.getCurrentTime()
+  //     this.progressCallback?.(currentTime)
+  //     this.rafId = requestAnimationFrame(updateProgress)
+  //   }
+  //
+  //   this.rafId = requestAnimationFrame(updateProgress)
+  // }
+  //
+  // private stopProgressTracking() {
+  //   if (this.rafId !== null) {
+  //     cancelAnimationFrame(this.rafId)
+  //     this.rafId = null
+  //   }
+  // }
+
+  addEventListener(type: 'timeupdate', listener: (event: CustomEvent<number>) => void): void {
+    this.eventTarget.addEventListener(type, listener as EventListener)
+  }
+
+  removeEventListener(type: 'timeupdate', listener: (event: CustomEvent<number>) => void): void {
+    this.eventTarget.removeEventListener(type, listener as EventListener)
+  }
+
+  private startProgressTracking() {
+    const updateProgress = () => {
+      if (!this.isPlaying) return
+
+      const currentTime = this.getCurrentTime()
+      // Dispatch event instead of calling callback
+      this.eventTarget.dispatchEvent(new CustomEvent('timeupdate', { detail: currentTime }))
+
+      requestAnimationFrame(updateProgress)
+    }
+
+    requestAnimationFrame(updateProgress)
+  }
+
+  getCurrentTime(): number {
+    return this.isPlaying ? this.audioContext.currentTime - this.startTime : this.offset
+  }
+
+  getDuration(): number {
+    return this.duration
+  }
+
+  getPlayingState() {
+    return this.isPlaying
+  }
+
+  seek(time: number) {
+    const wasPlaying = this.isPlaying
+    if (wasPlaying) {
+      this.pause()
+    }
+
+    this.offset = Math.max(0, Math.min(time, this.duration))
+
+    if (wasPlaying) {
+      this.play()
+    } else {
+      this.eventTarget.dispatchEvent(new CustomEvent('timeupdate', { detail: this.offset }))
+    }
   }
 
   setBalance(value: number) {

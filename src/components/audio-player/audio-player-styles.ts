@@ -1,66 +1,23 @@
-/*:host {*/
-/*  display: block;*/
-/*  width: 100%;*/
-/*  max-width: 500px;*/
-/*  padding: 1rem;*/
-/*  font-family: system-ui, sans-serif;*/
-/*}*/
+import { css } from 'lit'
 
-/*.player-container {*/
-/*  border: 1px solid #ccc;*/
-/*  border-radius: 8px;*/
-/*  padding: 1rem;*/
-/*}*/
-
-/*.controls {*/
-/*  display: flex;*/
-/*  gap: 1rem;*/
-/*  align-items: center;*/
-/*  margin-bottom: 1rem;*/
-/*}*/
-
-/*.play-button {*/
-/*  background: #2563eb;*/
-/*  color: white;*/
-/*  border: none;*/
-/*  border-radius: 50%;*/
-/*  width: 40px;*/
-/*  height: 40px;*/
-/*  cursor: pointer;*/
-/*  display: flex;*/
-/*  align-items: center;*/
-/*  justify-content: center;*/
-/*}*/
-
-/*.play-button:hover {*/
-/*  background: #1d4ed8;*/
-/*}*/
-
-/*.compare-slider {*/
-/*  width: 100%;*/
-/*  margin: 1rem 0;*/
-/*}*/
-
-/*.labels {*/
-/*  display: flex;*/
-/*  justify-content: space-between;*/
-/*  margin-top: 0.5rem;*/
-/*}*/
-
-:host {
+export const audioPlayerStyles = css`
+  :host {
     display: block;
     width: 100%;
     max-width: 600px;
-    font-family: system-ui, -apple-system, sans-serif;
-}
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
 
-.gorgon-player {
+  .gorgon-player {
     border-radius: 16px;
     border-color: #666666;
     border-width: 2px;
-}
+  }
 
-.player-container {
+  .player-container {
     background: white;
     border-radius: 16px;
     padding: 24px;
@@ -68,43 +25,43 @@
     display: flex;
     flex-direction: row;
     gap: 32px;
-}
+  }
 
-.main-player {
+  .main-player {
     flex-grow: 1;
-}
+  }
 
-.play-button-container {
+  .play-button-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-}
+  }
 
-.player-header {
+  .player-header {
     margin-bottom: 24px;
-}
+  }
 
-.track-title {
+  .track-name {
     font-size: 24px;
     font-weight: 600;
     margin: 0 0 4px 0;
-}
+  }
 
-.track-subtitle {
+  .artist-name {
     font-size: 16px;
     color: #666;
     margin: 0;
-}
+  }
 
-.controls {
+  .controls {
     display: flex;
     align-items: center;
     gap: 16px;
     margin-bottom: 16px;
-}
+  }
 
-.play-button {
+  .play-button {
     background: #000;
     color: white;
     border: none;
@@ -115,27 +72,45 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
+  }
 
-.play-button:hover {
+  .play-button:hover {
     background: #333;
-}
+  }
 
-.progress-bar {
+  .progress-bar {
+    position: relative;
     flex-grow: 1;
     height: 4px;
-    background: #cccccc;
+    background: #e0e0e0;
     border-radius: 2px;
-}
+    cursor: pointer;
+    overflow: hidden;
+  }
 
-.time {
+  .progress-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: #000;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  .progress-bar:hover .progress-fill {
+    background: #333;
+  }
+
+  .time {
     font-size: 14px;
     color: #666;
-    min-width: 45px;
+    min-width: 100px;
     text-align: right;
-}
+    font-variant-numeric: tabular-nums;
+  }
 
-.compare-controls {
+  .compare-controls {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -143,26 +118,26 @@
     gap: 48px;
     font-weight: 600;
     font-size: 1.5rem;
-}
+  }
 
-.track-label {
+  .track-label {
     font-size: 14px;
     color: #666;
-}
+  }
 
-.toggle-switch {
+  .toggle-switch {
     position: relative;
     width: 44px;
     height: 24px;
-}
+  }
 
-.toggle-switch input {
+  .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
-}
+  }
 
-.slider {
+  .slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -170,26 +145,27 @@
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 24px;
-}
+  }
 
-.slider:before {
+  .slider:before {
     position: absolute;
-    content: "";
+    content: '';
     height: 20px;
     width: 20px;
     left: 2px;
     bottom: 2px;
     background-color: white;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 50%;
-}
+  }
 
-input:checked + .slider {
+  input:checked + .slider {
     background-color: #000;
-}
+  }
 
-input:checked + .slider:before {
+  input:checked + .slider:before {
     transform: translateX(20px);
-}
+  }
+`

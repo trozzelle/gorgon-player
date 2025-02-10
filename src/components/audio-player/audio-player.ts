@@ -1,69 +1,55 @@
 import { AudioController } from '../../lib/audio-controller.ts'
-import styles from './audio-player.css?inline'
-import { html, render } from 'lit-html'
 import { logger } from '../../lib/logger.ts'
+import { LitElement, html } from 'lit'
+import { customElement, property, state } from 'lit/decorators.js'
+import { HTMLDivElement, MouseEvent } from 'happy-dom'
+import { audioPlayerStyles } from './audio-player-styles.ts'
 
-export class GorgonPlayer extends HTMLElement {
-  private shadow: ShadowRoot
+@customElement('gorgon-player')
+export class GorgonPlayer extends LitElement {
+  static styles = audioPlayerStyles
+
   private audioController: AudioController
-  private isPlaying = false
 
-  // Store references to our dom elements
-  private playButton: HTMLButtonElement | null = null
-  private slider: HTMLInputElement | null = null
+  @property({ type: Boolean }) isPlaying = false
+  @property({ type: String, attribute: 'artist-name' }) artistName = 'No Artist'
+  @property({ type: String, attribute: 'track-name' }) trackName = 'Default Track'
+  @property({ type: String, attribute: 'track-a-title' }) trackATitle = 'Demo Track'
+  @property({ type: String, attribute: 'track-b-title' }) trackBTitle = 'Master Track'
+  @property({ type: String, attribute: 'track-a' }) trackA = ''
+  @property({ type: String, attribute: 'track-b' }) trackB = ''
 
-  private trackATitle: string | null = null
-  private trackBTitle: string | null = null
+  @state() private currentTime = 0
+  @state() private duration = 0
 
   constructor() {
     super()
-    // TODO: Create dev/prod value insertion here
-    this.shadow = this.attachShadow({ mode: 'open' })
     this.audioController = new AudioController()
-
-    this.handlePlay = this.handlePlay.bind(this)
-    this.handleToggle = this.handleToggle.bind(this)
-
-    this.setupStyles()
-    this.render()
-
-    this.playButton = this.shadow.querySelector('.play-button')
-    this.slider = this.shadow.querySelector('.compare-slider')
-
-    this.setupEventListeners()
   }
 
-  private setupStyles() {
-    if (this.shadow.adoptedStyleSheets !== undefined && 'replaceSync' in CSSStyleSheet.prototype) {
-      const stylesheet = new CSSStyleSheet()
-      stylesheet.replaceSync(styles)
-      this.shadow.adoptedStyleSheets = [stylesheet]
-    } else {
-      const styleElement = document.createElement('style')
-      styleElement.textContent = styles
-      this.shadow.appendChild(styleElement)
-    }
-  }
-
-  // Setup and teardown lifecycle methods handled
-  // automatically by the browser
   async connectedCallback() {
-    const trackA = this.getAttribute('track-a') || ''
-    const trackB = this.getAttribute('track-b') || ''
+    super.connectedCallback()
 
-    this.trackATitle = this.getAttribute('track-a-title')
-    this.trackBTitle = this.getAttribute('track-b-title')
+    this.audioController.addEventListener('timeupdate', (e: CustomEvent<number>) => {
+      this.currentTime = e.detail
+      this.duration = this.audioController.getDuration()
+    })
 
     try {
-      await this.audioController.loadTracks(trackA, trackB)
+      await this.audioController.loadTracks(this.trackA, this.trackB)
+      this.duration = this.audioController.getDuration()
     } catch (error) {
       logger.debug(`Error loading tracks: ${error}`)
     }
   }
 
   disconnectedCallback() {
-    this.playButton?.removeEventListener('click', this.handlePlay)
-    this.slider?.removeEventListener('input', this.handleToggle)
+    super.disconnectedCallback()
+
+    this.audioController.removeEventListener('timeupdate', (e: CustomEvent<number>) => {
+      this.currentTime = e.detail
+      this.duration = this.audioController.getDuration()
+    })
   }
 
   private handlePlay() {
@@ -73,28 +59,39 @@ export class GorgonPlayer extends HTMLElement {
       this.audioController.play()
     }
     this.isPlaying = !this.isPlaying
-    this.updatePlayButton()
   }
 
-  // Refactoring to toggle
   private handleToggle(e: Event) {
     const checked = (e.target as HTMLInputElement).checked
     const value = checked ? 1 : 0
     this.audioController.setBalance(value)
   }
 
-  private updatePlayButton() {
-    if (this.playButton) {
-      this.playButton.textContent = this.isPlaying ? '⏸' : '▶'
-    }
+  private handleProgressClick(e: MouseEvent) {
+    logger.debug('Timeline clicked')
+    const progressBar = e.currentTarget as HTMLDivElement
+    const rect = progressBar.getBoundingClientRect()
+    const clickPosition = (e.clientX - rect.left) / rect.width
+    const newTime = clickPosition * this.duration
+    logger.debug(`clickPosition: ${clickPosition} \n newTime: ${newTime}`)
+
+    this.audioController.seek(newTime)
   }
 
-  private setupEventListeners() {
-    // this.playButton?.addEventListener('click', this.handlePlay)
-    // this.slider?.addEventListener('input', this.handleToggle)
+  private updateProgress(time: number) {
+    this.currentTime = time
+    this.duration = this.audioController.getDuration()
   }
 
-  private template() {
+  private formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = Math.floor(seconds % 60)
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  protected render() {
+    const progress = (this.currentTime / this.duration) * 100 || 0
+
     return html`
       <div class="player-container">
         <div class="play-button-container">
@@ -104,13 +101,17 @@ export class GorgonPlayer extends HTMLElement {
         </div>
         <div class="main-player">
           <div class="player-header">
-            <h2 class="track-title">${this.trackATitle || 'Demo Track'}</h2>
-            <p class="track-subtitle">${this.trackBTitle || 'Artist'}</p>
-          </div>
+            <h2 class="track-name">${this.trackName}</h2>
+            <p class="artist-name">${this.artistName}</div>
+          </p>
 
           <div class="controls">
-            <div class="progress-bar"></div>
-            <span class="time">00:00</span>
+            <div class="progress-bar" @click=${this.handleProgressClick}>
+              <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <span class="time">
+                ${this.formatTime(this.currentTime)} / ${this.formatTime(this.duration)}
+              </span>
           </div>
 
           <div class="compare-controls">
@@ -123,11 +124,8 @@ export class GorgonPlayer extends HTMLElement {
           </div>
         </div>
       </div>
+      </div>
     `
-  }
-
-  private render() {
-    render(this.template(), this.shadow)
   }
 
   protected getAudioController(): AudioController {
@@ -135,4 +133,4 @@ export class GorgonPlayer extends HTMLElement {
   }
 }
 
-customElements.define('gorgon-player', GorgonPlayer)
+// customElements.define('gorgon-player', GorgonPlayer)
