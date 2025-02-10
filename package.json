@@ -56,5 +56,8 @@
     "vite": "^6.0.5",
     "vitest": "^3.0.4",
     "whatwg-fetch": "^3.6.20"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.9.5"
   }
 }
