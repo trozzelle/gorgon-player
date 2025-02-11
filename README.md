@@ -47,15 +47,6 @@ npm run test
 | `track-a-title` | String | `'Demo'` | Label for track A |
 | `track-b-title` | String | `'Master'` | Label for track B |
 
-### Events
-
-| Event | Detail | Description |
-|-------|--------|-------------|
-| `play` | `{ time: number }` | Fired when playback starts |
-| `pause` | `{ time: number }` | Fired when playback pauses |
-| `trackSwitch` | `{ track: 'A' \| 'B' }` | Fired when switching between tracks |
-
-
 
 ## License
 
